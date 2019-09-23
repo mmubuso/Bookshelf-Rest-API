@@ -5,21 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"math/rand"
+	"net/http"
 	"strconv"
-	"github.com/gorilla/mux"
+
 	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 // Book struct // (Models)
 // we use the tag to create the json format
 type Book struct {
-	ID     string  "json:id"
-	ISBN   string  "json:isbn"
-	Title  string  "json:title"
-	Author *Author "json:author"
-	Description string "json:description"
+	ID          string  "json:id"
+	ISBN        string  "json:isbn"
+	Title       string  "json:title"
+	Author      *Author "json:author"
+	Description string  "json:description"
 }
 
 // Author struct
@@ -34,10 +35,10 @@ var books = make([]Book, 0)
 func main() {
 
 	// allow cors requests
-	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With","Access-Control-Allow-Origin"})
-    allowedOrigins := handlers.AllowedOrigins([]string{"*"})
-    allowedMethods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"})
-	
+	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin"})
+	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
+	allowedMethods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"})
+
 	// init router
 	r := mux.NewRouter()
 
@@ -47,7 +48,6 @@ func main() {
 	books = append(books, Book{ID: "3", ISBN: "45645", Title: "Golang For Dudes", Description: "Learn how to code by using a dude based approach", Author: &Author{FirstName: "Musiteli", LastName: "Mubuso"}})
 	books = append(books, Book{ID: "4", ISBN: "15445", Title: "Golang For Gangsters", Description: "Learn how to code by using a gangs based approach", Author: &Author{FirstName: "Musiteli", LastName: "Mubuso"}})
 
-
 	// Router Handlers	/ Endpoints
 	r.HandleFunc("/api/v1/books", getBooks).Methods("GET")
 	r.HandleFunc("/api/v1/books/{id}", getBook).Methods("GET")
@@ -56,8 +56,9 @@ func main() {
 	r.HandleFunc("/api/v1/books/{id}", deleteBook).Methods("DELETE")
 
 	// We listen on port 8000 using our router r
-	log.Fatal(http.ListenAndServe(":8000", handlers.CORS(allowedHeaders,allowedMethods,allowedOrigins)(r)))
+
 	fmt.Println("Server is running on port 8000")
+	log.Fatal(http.ListenAndServe(":8000", handlers.CORS(allowedHeaders, allowedMethods, allowedOrigins)(r)))
 }
 
 // Get all books
@@ -87,8 +88,8 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var book Book
 	// We use the ampersand to make sure pass the book by reference and not value
-	_= json.NewDecoder(r.Body).Decode(&book)
-	book.ID = strconv.Itoa(rand.Intn(10000000000)) 
+	_ = json.NewDecoder(r.Body).Decode(&book)
+	book.ID = strconv.Itoa(rand.Intn(10000000000))
 	books = append(books, book)
 	fmt.Println(book)
 	fmt.Printf("%+v\n", books)
@@ -99,9 +100,9 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 func deleteBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r) //Get params
-	for key, book := range books{
+	for key, book := range books {
 		if book.ID == params["id"] {
-			books = append(books[:key],books[key+1:]...)
+			books = append(books[:key], books[key+1:]...)
 			fmt.Println(books)
 			json.NewEncoder(w).Encode(books)
 			return
@@ -112,8 +113,8 @@ func deleteBook(w http.ResponseWriter, r *http.Request) {
 
 // update a book
 func updateBook(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type","application/json")
-	var book Book;
+	w.Header().Set("Content-Type", "application/json")
+	var book Book
 	params := mux.Vars(r) //Get params
 	for _, item := range books {
 		if item.ID == params["id"] {
